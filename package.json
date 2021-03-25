@@ -1,12 +1,9 @@
 {
-  "name": "ts-transformer-svgr",
+  "name": "ts-transformer-svg-jsx",
   "version": "0.0.0",
-  "description": "Transform SVG files with SVGR in TypeScript.",
+  "description": "Embed SVG files as JSX in TypeScript files.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsc",
     "watch": "npm run build -- --watch",
@@ -15,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tommy351/ts-transformer-svgr.git"
+    "url": "https://github.com/tommy351/ts-transformer-svg-jsx.git"
   },
   "keywords": [
     "typescript",
@@ -25,9 +22,9 @@
   "author": "Tommy Chen <tommy351@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tommy351/ts-transformer-svgr/issues"
+    "url": "https://github.com/tommy351/ts-transformer-svg-jsx/issues"
   },
-  "homepage": "https://github.com/tommy351/ts-transformer-svgr#readme",
+  "homepage": "https://github.com/tommy351/ts-transformer-svg-jsx#readme",
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
@@ -40,11 +37,14 @@
     "node": ">=10"
   },
   "dependencies": {
+    "svg-parser": "^2.0.4",
     "tslib": "^2.1.0"
   },
   "devDependencies": {
     "@tsconfig/node10": "^1.0.7",
     "@types/lodash": "^4.14.168",
+    "@types/react": "^17.0.3",
+    "@types/svg-parser": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.12.0",
     "@typescript-eslint/parser": "^4.12.0",
     "eslint": "^7.17.0",
@@ -57,9 +57,11 @@
     "jest": "^26.6.3",
     "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",
+    "ts-jest": "^26.5.4",
     "typescript": "^4.1.5"
   },
   "peerDependencies": {
+    "react": "*",
     "typescript": "*"
   }
 }
