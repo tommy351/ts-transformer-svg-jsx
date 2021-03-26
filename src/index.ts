@@ -1,5 +1,4 @@
 import ts from "typescript";
-// eslint-disable-next-line node/no-missing-import
 import type { SVGFactory } from "react";
 import { join, resolve, dirname } from "path";
 import { ElementNode, Node, parse, TextNode } from "svg-parser";
@@ -7,7 +6,10 @@ import assert from "assert";
 
 const INDEX_TS = join(__dirname, "index.d.ts");
 
-export function svgToJsx(path: string): SVGFactory {
+export function svgToJsx(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  path: string
+): SVGFactory {
   throw new Error(
     "Do not use svgToJsx directly. Please make sure ts-transformer-svg-jsx is set up properly."
   );
@@ -93,9 +95,8 @@ function generateJsx(content: string) {
   return generateJsxChildren(rootNode.children)[0];
 }
 
-export default function (
-  program: ts.Program,
-  pluginOption: unknown
+export default function transform(
+  program: ts.Program
 ): ts.TransformerFactory<ts.SourceFile> {
   const typeChecker = program.getTypeChecker();
 
