@@ -35,7 +35,7 @@ function createLiteralValue(value?: string | number | boolean) {
   return ts.factory.createNull();
 }
 
-function generateSvgElement(node: ElementNode) {
+function generateSvgElement(node: ElementNode, originalNode?: ts.Node) {
   assert(node.tagName);
 
   const tagName = ts.factory.createIdentifier(node.tagName);
@@ -51,15 +51,35 @@ function generateSvgElement(node: ElementNode) {
   }
 
   const jsxAttributes = ts.factory.createJsxAttributes(attributes);
+  const children: ts.JsxChild[] = [];
 
-  if (!node.children.length) {
-    return ts.factory.createJsxSelfClosingElement(tagName, [], jsxAttributes);
+  for (const child of node.children) {
+    if (typeof child === "string") continue;
+    children.push(generateJsx(child, originalNode));
+  }
+
+  // Fix `TypeError: Cannot read property 'kind' of undefined` by
+  // setting an original node.
+  //
+  // https://github.com/madou/typescript-transformer-handbook#emitresolver-cannot-handle-jsxopeninglikeelement-and-jsxopeningfragment-that-didnt-originate-from-the-parse-tree
+
+  if (!children.length) {
+    return ts.setOriginalNode(
+      ts.factory.createJsxSelfClosingElement(tagName, [], jsxAttributes),
+      originalNode
+    );
   }
 
   return ts.factory.createJsxElement(
-    ts.factory.createJsxOpeningElement(tagName, [], jsxAttributes),
-    generateJsxChildren(node.children),
-    ts.factory.createJsxClosingElement(tagName)
+    ts.setOriginalNode(
+      ts.factory.createJsxOpeningElement(tagName, [], jsxAttributes),
+      originalNode
+    ),
+    children,
+    ts.setOriginalNode(
+      ts.factory.createJsxClosingElement(tagName),
+      originalNode
+    )
   );
 }
 
@@ -70,29 +90,13 @@ function generateSvgText(node: TextNode) {
   );
 }
 
-function generateJsxChildren(nodes: (string | Node)[]) {
-  const children: ts.JsxChild[] = [];
-
-  for (const node of nodes) {
-    if (typeof node === "string") continue;
-
-    switch (node.type) {
-      case "element":
-        children.push(generateSvgElement(node));
-        break;
-      case "text":
-        children.push(generateSvgText(node));
-        break;
-    }
+function generateJsx(svgNode: Node, originalNode?: ts.Node) {
+  switch (svgNode.type) {
+    case "element":
+      return generateSvgElement(svgNode, originalNode);
+    case "text":
+      return generateSvgText(svgNode);
   }
-
-  return children;
-}
-
-function generateJsx(content: string) {
-  const rootNode = parse(content);
-  if (!rootNode.children.length) return;
-  return generateJsxChildren(rootNode.children)[0];
 }
 
 export default function transform(
@@ -146,7 +150,9 @@ export default function transform(
           throw new Error(`File "${svgPath}" does not exist`);
         }
 
-        return generateJsx(svgContent);
+        const svgNode = parse(svgContent);
+
+        return generateJsx(svgNode.children[0], node);
       }
 
       return ts.visitEachChild(node, visitor, ctx);
