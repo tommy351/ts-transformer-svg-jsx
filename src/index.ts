@@ -7,9 +7,9 @@ import assert from "assert";
 
 const INDEX_TS = join(__dirname, "index.d.ts");
 
-export function svgr(path: string): SVGFactory {
+export function svgToJsx(path: string): SVGFactory {
   throw new Error(
-    "Do not use svgr directly. Please make sure ts-transformer-svgr is set up properly."
+    "Do not use svgToJsx directly. Please make sure ts-transformer-svg-jsx is set up properly."
   );
 }
 
@@ -116,7 +116,8 @@ export default function (
 
         if (
           !declaration ||
-          ts.isJSDocSignature(node) ||
+          ts.isJSDocSignature(declaration) ||
+          declaration.name?.getText() !== "svgToJsx" ||
           declaration.getSourceFile().fileName !== INDEX_TS
         ) {
           return node;
