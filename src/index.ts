@@ -102,11 +102,11 @@ export default function transform(
 
   return (ctx) => {
     const visitor: ts.Visitor = (node) => {
-      // Remove ts-transformer-svgr import declarations
+      // Remove ts-transformer-svg-jsx import declarations
       if (
         ts.isImportDeclaration(node) &&
         ts.isStringLiteral(node.moduleSpecifier) &&
-        node.moduleSpecifier.text === "ts-transformer-svgr"
+        node.moduleSpecifier.text === "ts-transformer-svg-jsx"
       ) {
         return;
       }
