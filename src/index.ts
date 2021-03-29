@@ -1,5 +1,5 @@
 import type { SVGFactory } from "react";
-import { createTransformer } from "./transformer";
+import { createTransformer, TransformerOptions } from "./transformer";
 
 export function svgToJsx(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -10,4 +10,5 @@ export function svgToJsx(
   );
 }
 
+export { TransformerOptions };
 export default createTransformer;

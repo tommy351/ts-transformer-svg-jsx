@@ -1,7 +1,8 @@
 import ts from "typescript";
 import { join, resolve, dirname } from "path";
-import { ElementNode, Node, parse, TextNode } from "svg-parser";
+import svg from "svg-parser";
 import assert from "assert";
+import svgo from "svgo";
 
 const INDEX_TS = join(__dirname, "index.d.ts");
 
@@ -9,10 +10,34 @@ function isRelativePath(path: string) {
   return path.startsWith("./") || path.startsWith("../");
 }
 
+export interface TransformerOptions {
+  svgo?: svgo.OptimizeOptions;
+}
+
 export function createTransformer(
-  program: ts.Program
+  program: ts.Program,
+  options: TransformerOptions = {}
 ): ts.TransformerFactory<ts.SourceFile> {
   const typeChecker = program.getTypeChecker();
+
+  function readSvgFile(path: string) {
+    let content = ts.sys.readFile(path, "utf-8");
+
+    if (typeof content !== "string") {
+      throw new Error(`File "${path}" does not exist`);
+    }
+
+    if (options.svgo) {
+      const optimizedSvg = svgo.optimize(content, {
+        path,
+        ...options.svgo,
+      });
+
+      content = optimizedSvg.data;
+    }
+
+    return svg.parse(content);
+  }
 
   return (ctx) => {
     function createLiteral(value?: string | number | boolean) {
@@ -32,7 +57,7 @@ export function createTransformer(
     }
 
     function generateSvgElement(
-      node: ElementNode,
+      node: svg.ElementNode,
       originalNode?: ts.Node,
       additionalProps?: readonly ts.JsxAttributeLike[]
     ) {
@@ -87,7 +112,7 @@ export function createTransformer(
       );
     }
 
-    function generateSvgText(node: TextNode) {
+    function generateSvgText(node: svg.TextNode) {
       return ctx.factory.createJsxExpression(
         undefined,
         createLiteral(node.value)
@@ -95,7 +120,7 @@ export function createTransformer(
     }
 
     function generateJsx(
-      svgNode: Node,
+      svgNode: svg.Node,
       originalNode?: ts.Node,
       additionalProps?: readonly ts.JsxAttributeLike[]
     ) {
@@ -169,13 +194,7 @@ export function createTransformer(
           ? resolve(dirname(node.getSourceFile().fileName), pathArg.text)
           : require.resolve(pathArg.text);
 
-        const svgContent = ts.sys.readFile(svgPath, "utf-8");
-
-        if (typeof svgContent !== "string") {
-          throw new Error(`File "${svgPath}" does not exist`);
-        }
-
-        const svgNode = parse(svgContent);
+        const svgNode = readSvgFile(svgPath);
         const propsName = "props";
 
         return generateFunctionComponent(
