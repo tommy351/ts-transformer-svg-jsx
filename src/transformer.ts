@@ -1,8 +1,8 @@
 import ts from "typescript";
 import { join, resolve, dirname } from "path";
-import svg from "svg-parser";
+import * as svg from "svg-parser";
 import assert from "assert";
-import svgo from "svgo";
+import * as svgo from "svgo";
 
 const INDEX_TS = join(__dirname, "index.d.ts");
 
