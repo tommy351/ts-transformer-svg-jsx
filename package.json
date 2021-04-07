@@ -7,7 +7,8 @@
   "module": "dist/index.mjs",
   "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "transformer.js"
   ],
   "scripts": {
     "build": "tsc-multi",
