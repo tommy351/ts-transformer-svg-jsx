@@ -14,7 +14,7 @@ export interface TransformerOptions {
   svgo?: svgo.OptimizeOptions;
 }
 
-export function createTransformer(
+export default function createTransformer(
   program: ts.Program,
   options: TransformerOptions = {}
 ): ts.TransformerFactory<ts.SourceFile> {
