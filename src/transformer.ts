@@ -3,6 +3,7 @@ import { join, resolve, dirname } from "path";
 import * as svg from "svg-parser";
 import assert from "assert";
 import * as svgo from "svgo";
+import possibleStandardNames from "./possibleStandardNames";
 
 const INDEX_TS = join(__dirname, "index.d.ts");
 
@@ -69,7 +70,7 @@ export default function createTransformer(
       for (const [key, value] of Object.entries(node.properties || {})) {
         attributes.push(
           ctx.factory.createJsxAttribute(
-            ctx.factory.createIdentifier(key),
+            ctx.factory.createIdentifier(possibleStandardNames[key] || key),
             ctx.factory.createJsxExpression(undefined, createLiteral(value))
           )
         );
