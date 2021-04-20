@@ -16,6 +16,14 @@ Use with [ttypescript](https://github.com/cevek/ttypescript).
 }
 ```
 
+Use with [Babel](https://babeljs.io/).
+
+```json
+{
+  "plugins": [["ts-transformer-svg-jsx/babel", { "svgo": {} }]]
+}
+```
+
 Example:
 
 ```tsx

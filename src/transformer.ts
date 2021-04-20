@@ -1,44 +1,17 @@
 import ts from "typescript";
-import { join, resolve, dirname } from "path";
-import * as svg from "svg-parser";
+import { join } from "path";
+import type * as svg from "svg-parser";
 import assert from "assert";
-import * as svgo from "svgo";
 import possibleStandardNames from "./possibleStandardNames";
+import { readSvgFile, resolvePath, TransformerOptions } from "./utils";
 
 const INDEX_TS = join(__dirname, "index.d.ts");
-
-function isRelativePath(path: string) {
-  return path.startsWith("./") || path.startsWith("../");
-}
-
-export interface TransformerOptions {
-  svgo?: svgo.OptimizeOptions;
-}
 
 export default function createTransformer(
   program: ts.Program,
   options: TransformerOptions = {}
 ): ts.TransformerFactory<ts.SourceFile> {
   const typeChecker = program.getTypeChecker();
-
-  function readSvgFile(path: string) {
-    let content = ts.sys.readFile(path, "utf-8");
-
-    if (typeof content !== "string") {
-      throw new Error(`File "${path}" does not exist`);
-    }
-
-    if (options.svgo) {
-      const optimizedSvg = svgo.optimize(content, {
-        path,
-        ...options.svgo,
-      });
-
-      content = optimizedSvg.data;
-    }
-
-    return svg.parse(content);
-  }
 
   return (ctx) => {
     function createLiteral(value?: string | number | boolean) {
@@ -191,11 +164,11 @@ export default function createTransformer(
         }
 
         // TODO: Resolve with the paths config in tsconfig.json.
-        const svgPath = isRelativePath(pathArg.text)
-          ? resolve(dirname(node.getSourceFile().fileName), pathArg.text)
-          : require.resolve(pathArg.text);
-
-        const svgNode = readSvgFile(svgPath);
+        const svgPath = resolvePath(
+          pathArg.text,
+          node.getSourceFile().fileName
+        );
+        const svgNode = readSvgFile(svgPath, options);
         const propsName = "props";
 
         return generateFunctionComponent(
