@@ -1,6 +1,6 @@
 {
   "name": "ts-transformer-svg-jsx",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Embed SVG files as JSX in TypeScript files.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,6 +8,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "babel.js",
     "transformer.js"
   ],
   "scripts": {
