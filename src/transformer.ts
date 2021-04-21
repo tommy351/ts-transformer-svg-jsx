@@ -108,12 +108,13 @@ export default function createTransformer(
 
     function generateFunctionComponent(
       returnNode: ts.Expression,
-      propsName: string
+      propsName: string,
+      name?: ts.Identifier
     ) {
       return ctx.factory.createFunctionExpression(
         undefined,
         undefined,
-        undefined,
+        name,
         undefined,
         [
           ctx.factory.createParameterDeclaration(
@@ -126,6 +127,15 @@ export default function createTransformer(
         undefined,
         ctx.factory.createBlock([ctx.factory.createReturnStatement(returnNode)])
       );
+    }
+
+    function getComponentName(node: ts.CallExpression) {
+      if (
+        ts.isVariableDeclaration(node.parent) &&
+        ts.isIdentifier(node.parent.name)
+      ) {
+        return node.parent.name;
+      }
     }
 
     const visitor: ts.Visitor = (node) => {
@@ -177,7 +187,8 @@ export default function createTransformer(
               ctx.factory.createIdentifier(propsName)
             ),
           ]),
-          propsName
+          propsName,
+          getComponentName(node)
         );
       }
 

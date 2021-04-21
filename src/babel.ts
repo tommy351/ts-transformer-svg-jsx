@@ -1,4 +1,4 @@
-import type { PluginObj, types } from "@babel/core";
+import type { PluginObj, types, NodePath } from "@babel/core";
 import type * as svg from "svg-parser";
 import assert from "assert";
 import possibleStandardNames from "./possibleStandardNames";
@@ -86,13 +86,20 @@ export default function (babel: { types: typeof types }): PluginObj {
 
   function generateFunctionComponent(
     returnNode: types.Expression,
-    propsName: string
+    propsName: string,
+    id?: types.Identifier
   ) {
     return t.functionExpression(
-      undefined,
+      id,
       [t.identifier(propsName)],
       t.blockStatement([t.returnStatement(returnNode)])
     );
+  }
+
+  function getComponentName(path: NodePath<types.CallExpression>) {
+    if (t.isVariableDeclarator(path.parent) && t.isIdentifier(path.parent.id)) {
+      return path.parent.id;
+    }
   }
 
   return {
@@ -136,7 +143,8 @@ export default function (babel: { types: typeof types }): PluginObj {
             generateJsx(svgNode.children[0], [
               t.jsxSpreadAttribute(t.identifier(propsName)),
             ]) as types.Expression,
-            propsName
+            propsName,
+            getComponentName(path)
           )
         );
       },
